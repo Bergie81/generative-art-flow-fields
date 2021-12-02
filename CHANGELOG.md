@@ -27,5 +27,9 @@ Patch:
 <!-- "In this commit I ..." -->
 
 
+# "Create basic stroke"
+##### 002 - 02.12.2021, v0.1.1
+
+
 # "Initial commit with basic flow field animation"
 ##### 001 - 02.12.2021, v0.1.0
