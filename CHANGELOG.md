@@ -27,6 +27,10 @@ Patch:
 <!-- "In this commit I ..." -->
 
 
+# "Create single stroke following the flow field"
+##### 003 - 03.12.2021, v0.1.2
+
+
 # "Create basic stroke"
 ##### 002 - 02.12.2021, v0.1.1
 

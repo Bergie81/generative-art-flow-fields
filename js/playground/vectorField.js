@@ -1,6 +1,6 @@
 var dim = 400;
 var inc = 0.1;
-var scl = 10;
+var scl = 20;
 
 var cols, rows;
 
@@ -55,7 +55,7 @@ function draw() {
     }
     yoff += inc;
 
-    zoff += 0.00005; // INFO: how fast vectors change over time
+    // zoff += 0.00005; // INFO: how fast vectors change over time
   }
 
   stroke(0);
