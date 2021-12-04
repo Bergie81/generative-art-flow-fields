@@ -27,6 +27,10 @@ Patch:
 <!-- "In this commit I ..." -->
 
 
+# "Create groups of flow field strokes"
+##### 004 - 04.12.2021, v0.1.3
+
+
 # "Create single stroke following the flow field"
 ##### 003 - 03.12.2021, v0.1.2
 

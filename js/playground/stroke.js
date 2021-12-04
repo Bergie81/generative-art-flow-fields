@@ -30,6 +30,10 @@ function draw() {
   // endShape();
 
   paintStroke();
+  stroke(0);
+  strokeWeight(5)
+  point(mouseX, mouseY);
+  point(380, 380);
 
   // fr.html(floor(frameRate()));
 }
@@ -49,7 +53,7 @@ function createSingleStroke(index) {
   endShape();
 };
 
-function createStrokes(noLines = 5, weight = 1, color = 0) {
+function createStrokes(noLines = 5, weight = 1, color = [0, 0, 0]) {
   strokeWeight(weight);
   stroke(color)
 
@@ -65,5 +69,5 @@ function createStrokes(noLines = 5, weight = 1, color = 0) {
 function paintStroke() {
   // Multiply Lines centered
   createStrokes(strokeSteps, 4);
-  createStrokes(strokeSteps, 2, 190);
+  createStrokes(strokeSteps, 2, [240, 240, 240]);
 }

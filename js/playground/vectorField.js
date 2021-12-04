@@ -58,7 +58,7 @@ function draw() {
     // zoff += 0.00005; // INFO: how fast vectors change over time
   }
 
-  stroke(0);
+  stroke(0); // stroke(0, 0) to make particles invisible
   for (let i = 0; i < particles.length; i++) {
     particles[i].follow(flowField);
     particles[i].update();
