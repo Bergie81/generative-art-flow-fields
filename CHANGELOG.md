@@ -27,6 +27,10 @@ Patch:
 <!-- "In this commit I ..." -->
 
 
+# "Clean up code"
+##### 005 - 05.12.2021, v0.1.4
+
+
 # "Create groups of flow field strokes"
 ##### 004 - 04.12.2021, v0.1.3
 

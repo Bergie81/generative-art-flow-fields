@@ -1,28 +1,27 @@
+let dim = {x: 1000, y: 1000};
+let inc = 0.1;
+let scl = 25;
+
+const noStrokeLines = 6;
+const noStrokes = 500;
+
 let cols, rows;
 let zoff = 0;
 let flowField;
 let fr;
 
-// Canvas
-let dim = {x: 1000, y: 1000};
-let inc = 0.1;
-let scl = 25;
-
-// Strokes
-const noStrokes = 500;
-const noStrokeLines = 6;
-const strokeLineDistance = 1.8;
-
 let lineWeight = dim.x / (18*scl);
-
 
 function setup() {
   createCanvas(dim.x, dim.y);
+
   cols = floor(width/scl);
   rows = floor(height/scl);
   flowField = new Array(rows*cols);
+
   noFill();
   noLoop();
+
   // Paragraph
   fr = createP("");
 }
@@ -48,21 +47,11 @@ function draw() {
   }
 
   // Draw stylized strokes
-  drawSingleStrokes(80);
-  drawSingleStrokes(160);
-  drawSingleStrokes(240);
+  drawStrokeGroup(80);
+  drawStrokeGroup(160);
+  drawStrokeGroup(240);
   
   // fr.html(floor(frameRate()));
-}
-
-// --------------------------------------------------
-// Functions
-// --------------------------------------------------
-
-function drawPoint(p, c) {
-  stroke(c)
-  strokeWeight(3);
-  point(p.x, p.y);
 }
 
 function showVectorField(x, y, v) {
@@ -76,9 +65,15 @@ function showVectorField(x, y, v) {
       pop();
 }
 
+function drawPoint(p, c) {
+  stroke(c)
+  strokeWeight(3);
+  point(p.x, p.y);
+}
+
 function getFlowFieldElement(point) {
   const gridPos = {x: floor(point.x/scl), y: floor(point.y/scl)};
-  return flowField.find(element => element.position.x == gridPos.x && element.position.y == gridPos.y);
+  return flowField.find(element => element.position.x == gridPos.x && element.position.y == gridPos.y) || undefined;
 }
 
 // Creates a number of points that follow the flow field
@@ -88,10 +83,10 @@ function createFlowLine(startPoint, noPoints) {
     const point = line[i].copy();
     // console.log("point", i, point);
     // drawPoint(point, floor(255/noPoints) * i);
-    const direction = getFlowFieldElement(point).vector;
-    const force = direction.setMag(scl);
-    const nextPoint = point.add(force);
-    // Prevents long strokes due to leaving the canvas
+    const force = getFlowFieldElement(point).vector;
+    const normForce = force.normalize().mult(scl);
+    const nextPoint = point.add(normForce);
+    // Prevents long strokes
     if (nextPoint.x < 0 || nextPoint.x > dim.x || nextPoint.y < 0 || nextPoint.y > dim.y) {
       break;
     }
@@ -100,7 +95,7 @@ function createFlowLine(startPoint, noPoints) {
   // drawPoint(line[line.length - 1], 200);
   // console.log("line length", line.length);
   if (line.length !== noPoints) {
-    return null;
+    return null
   } else {
     return line;
   }
@@ -109,10 +104,11 @@ function createFlowLine(startPoint, noPoints) {
 function createAdjacentFlowLine(line, no) {
   const adjLine = [];
   for (let i = 0; i < line.length; i++) {
+    const lineDistance = 2;
     let point = line[i].copy();
-    const direction = getFlowFieldElement(point).vector;
-    const force = direction.copy().setMag(strokeLineDistance * no).rotate(-PI/2);
-    point = point.add(force);
+    const force = getFlowFieldElement(point).vector;
+    const adjForce = force.copy().setMag(lineDistance * no).rotate(-PI/2);
+    point = point.add(adjForce);
     // drawPoint(point, i * 30);
     adjLine.push(point);
   };
@@ -140,7 +136,7 @@ function stylizedStroke(line, color) {
   drawCurvedStroke(line, lineWeight, color);
 }
 
-function drawSingleStrokes(color) {
+function drawStrokeGroup(color) {
   let counter = 0;
   let counter2 = 0; 
   while (counter < noStrokes) {
