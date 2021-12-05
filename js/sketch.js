@@ -9,11 +9,15 @@ let scl = 25;
 let inc = 0.1;
 
 // Strokes
-const noStrokes = 300;
+const noStrokes = 30;
 const noStrokeLines = 6;
 const strokeLineDistance = 1.8;
 
 let lineWeight = dim.x / (18*scl);
+
+// Spots
+const spotArea = 3;
+const noSpotStrokes = 100;
 
 
 function setup() {
@@ -43,12 +47,17 @@ function draw() {
     };
     yoff += inc;
     // zoff += 0.00005; // INFO: how fast vectors change over time
-  }
+  };
 
-  // Draw stylized strokes
-  drawSingleStrokes(80);
-  drawSingleStrokes(160);
-  drawSingleStrokes(240);
+  // Draw blob of strokes
+  drawBlobsOfStrokes(3, [60, 140, 220]);
+
+  // Draw random single strokes
+  const noStrokeTypes = 3
+  for (let i = 0; i < noStrokeTypes; i++) {
+    drawSingleStrokes(floor(250 * i / noStrokeTypes));
+  };
+
   
   // frameRateCheck.html(floor(frameRate()));
 }
@@ -59,7 +68,7 @@ function draw() {
 
 function drawPoint(p, c) {
   stroke(c)
-  strokeWeight(3);
+  strokeWeight(10);
   point(p.x, p.y);
 };
 
@@ -141,9 +150,8 @@ function drawSingleStrokes(color) {
   let counter = 0;
   while (counter < noStrokes) {
     // console.log("counter", counter);
-    // Get random position in flow field and get vector
     const randomPoint = createVector(random(width), random(height));
-    // Draw base line starting from random position
+    // Draw base line with 4 points starting from random position
     const baseLine = createFlowLine(randomPoint, 4);
     // console.log("Line length", baseLine);
     // Draw more lines base on base line to create stroke (if not null)
@@ -157,5 +165,73 @@ function drawSingleStrokes(color) {
       stylizedStroke(stroke, color);
       counter++;
     };
+  };
+};
+
+// Blob of same stroke
+function drawBlobsOfStrokes(noSpots, color) {
+  
+  // Spots
+  for (let i = 0; i < noSpots; i++) {
+    const spots = [];
+    const randomSpot = createVector(random(width), random(height));
+    const spotAreaVariation = map(noise(random()), 0, 1, 0.8, 1.2);
+    const spotRadius = spotArea * scl * spotAreaVariation;
+    
+    // console.log("random Spot", randomSpot.x, randomSpot.y);
+    let counter = 0;
+    let loopbreaker = 0;
+    while (counter < noSpotStrokes) {
+      const spotPoint = createVector((randomSpot.x - spotRadius) + (2 * spotRadius * noise(random() * counter)), ((randomSpot.y - spotRadius) + (2 * spotRadius * noise(random() * counter))));
+      
+      // Avoid issues with line tracking in flow field
+      if (spotPoint.x < 0) {
+        spotPoint.x = 10;
+      };
+      if (spotPoint.x > width) {
+        spotPoint.x = width - 10;
+      };
+      if (spotPoint.y < 0) {
+        spotPoint.y = 10 ;
+      };
+      if (spotPoint.y > height) {
+        spotPoint.y = height - 10;
+      };
+
+      // drawPoint(spotPoint, 200);
+      // console.log("Spot Point", spotPoint.x, spotPoint.y);
+      // Draw base line with 4 points starting from spotPoint handle position
+      const baseLine = createFlowLine(spotPoint, 4);
+      // console.log("Line length", baseLine);
+      // Draw more lines base on base line to create stroke (if not null)
+      if (baseLine) {
+        const stroke = [baseLine];
+        for (let i = 1; i < noStrokeLines; i++) {
+          const adjacentLines = createAdjacentFlowLine(baseLine, i);
+          stroke.push(adjacentLines);
+        };
+        // console.log("Stroke", stroke);
+        counter++;
+        spots.push(stroke);
+      } else {
+        loopbreaker++
+        console.warn("Cannot create stroke:", spotPoint.x, spotPoint.y);
+      };
+      // Get out of loop if there are issues
+      if (loopbreaker > 10000) {
+        counter = noSpotStrokes
+        console.error("LOOP EXIT - Strokes too close to canvas border.");
+      };
+    };
+    // console.log("NO of Elements", counter, noSpotStrokes);
+    // if (spots.length > 0) {
+      for (let j = 0; j < spots.length; j++) {
+        drawCurvedStroke(spots[j], lineWeight * 2.5, 0);
+      };
+      for (let k = 0; k < spots.length; k++) {
+        drawCurvedStroke(spots[k], lineWeight, color[i]);
+      };
+      drawPoint(randomSpot, 0);
+    // };
   };
 };

@@ -27,6 +27,10 @@ Patch:
 <!-- "In this commit I ..." -->
 
 
+# "Create basic blob of strokes"
+##### 006 - 05.12.2021, v0.1.6
+
+
 # "Clean up code more"
 ##### 005 - 05.12.2021, v0.1.5
 
