@@ -9,26 +9,27 @@ let sceneScale = 25;
 let inc = 0.1;
 
 // Strokes
-const noStrokes = 50;
-const noStrokeLines = 6;
+let noStrokes = 50;
+let noStrokeLines = 6;
 const strokeLineDistance = 1.9;
-const strokeLineNoise = 0.3;
+const strokeLineNoise = 0.35;
 const lineNoise = 0.9;
 
 let lineWeight = dim.x / (18*sceneScale);
 
 // Spots
-const spotArea = 2;
-const noSpotStrokes = 100;
-const spotNoise = 5;
+let spotArea = 2;
+let noSpotStrokes = 100;
+let spotNoise = 5;
 
 // Colors
-const outlineColor = "#000";
-
-const colorPalette1 = ["#2B3A42", "#3F5866", "#BDD3DE", "#F0F0DF", "#FF9000"]; // Kuler: machine - Kopie von Copy of MAchine learning with Erik option 2
-const colorPalette2 = ["#181929", "#4D4E66", "#CCD0DE", "#FFFFFF", "#FF2612"]; // Kuler: machine - Kopie von Copy of MAchine learning with Erik option 2
+const colorPalette1 = ["#2B3A42", "#3F5866", "#BDD3DE", "#F0F0DF", "#FF9000"]; // Kuler: machine
+const colorPalette2 = ["#272942", "#565773", "#CCD0DE", "#FFFFFF", "#FF2612"]; // Kuler: machine
 const colorPalette3 = ["#609BE6", "#65C6F0", "#66D5D9", "#65F0CD", "#60E69F"]; // Kuler - colorful
+
+const outlineColor = "#000";
 const colorPalette = colorPalette2;
+
 
 function setup() {
   createCanvas(dim.x, dim.y);
@@ -53,23 +54,41 @@ function draw() {
       flowField[index] = {vector: v};
       flowField[index].position = {x, y};
       xoff += inc;
-      showVectorField(x, y, v);
+      // showVectorField(x, y, v);
     };
     yoff += inc;
     // zoff += 0.00005; // INFO: how fast vectors change over time
   };
 
-  // Draw blob of strokes
-  drawBlobsOfStrokes(5, colorPalette);
+  // // Draw blob of strokes
+  // drawBlobsOfStrokes(5);
 
-  // Draw random single strokes
-  const noStrokeTypes = 5
+  // // Draw random single strokes
+  // const noStrokeTypes = 5
+  // for (let i = 0; i < noStrokeTypes; i++) {
+  //   drawSingleStrokes(pickColorFromPalette());
+  // };
+
+// ARTWORK
+  // Big spots 
+  spotArea = 6;
+  noSpotStrokes = 200;
+  drawBlobsOfStrokes(200);
+  // Medium spots
+  spotArea = 2;
+  noSpotStrokes = 50;
+  spotNoise = 10;
+  drawBlobsOfStrokes(50);
+  // Many Single strokes
+  const noStrokeTypes = 10
   for (let i = 0; i < noStrokeTypes; i++) {
-    drawSingleStrokes(colorPalette[i]);
+    drawSingleStrokes(pickColorFromPalette());
   };
 
+
   // frameRateCheck.html(floor(frameRate()));
-}
+  console.log("Job done!");
+};
 
 // --------------------------------------------------
 // Functions
@@ -91,6 +110,14 @@ function showVectorField(x, y, v) {
       line(0, 0, sceneScale, 0);
       pop();
 };
+
+function pickColorFromPalette() {
+  const index = round(map(random(), 0, 1, 0, colorPalette.length - 1))
+  const color = colorPalette[index];
+  // console.log("Color index", index);
+  // console.log("Color", color);
+  return color;
+}
 
 function randomNoise(factor) {
   return map(noise(random()), 0, 1, 1 - factor, 1 + factor);
@@ -183,12 +210,18 @@ function drawSingleStrokes(color) {
 
 // Blob of same stroke
 function drawBlobsOfStrokes(noSpots, color) {
-  
+  let isColorDefined;
+  color ? isColorDefined = true : isColorDefined = false;
   // Spots
   for (let i = 0; i < noSpots; i++) {
     const spots = [];
     const randomSpot = createVector(random(width), random(height));
     const spotRadius = spotArea * sceneScale * randomNoise(spotNoise);
+
+    // When no color defined, pick a random one from current color palette
+      if (!isColorDefined) {
+        color = pickColorFromPalette();
+      };
     
     // console.log("random Spot", randomSpot.x, randomSpot.y);
     let counter = 0;
@@ -230,20 +263,18 @@ function drawBlobsOfStrokes(noSpots, color) {
         console.warn("Cannot create stroke:", spotPoint.x, spotPoint.y);
       };
       // Get out of loop if there are issues
-      if (loopChecker > 10000) {
+      if (loopChecker > 1000) {
         counter = noSpotStrokes
         console.error("LOOP EXIT - Strokes too close to canvas border.");
       };
     };
     // console.log("NO of Elements", counter, noSpotStrokes);
-    // if (spots.length > 0) {
       for (let j = 0; j < spots.length; j++) {
         drawCurvedStroke(spots[j], lineWeight * 2.5, outlineColor);
       };
       for (let k = 0; k < spots.length; k++) {
-        drawCurvedStroke(spots[k], lineWeight, color[i]);
+        drawCurvedStroke(spots[k], lineWeight, color);
       };
       // drawPoint(randomSpot, 0);
-    // };
   };
 };

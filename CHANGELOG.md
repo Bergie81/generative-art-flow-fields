@@ -27,6 +27,10 @@ Patch:
 <!-- "In this commit I ..." -->
 
 
+# "Create first basic generative artworks"
+##### 008 - 05.12.2021, v0.1.8
+
+
 # "Add color and noise to strokes"
 ##### 007 - 05.12.2021, v0.1.7
 
