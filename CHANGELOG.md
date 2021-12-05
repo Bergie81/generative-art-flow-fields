@@ -27,6 +27,10 @@ Patch:
 <!-- "In this commit I ..." -->
 
 
+# "Add color and noise to strokes"
+##### 007 - 05.12.2021, v0.1.7
+
+
 # "Create basic blob of strokes"
 ##### 006 - 05.12.2021, v0.1.6
 

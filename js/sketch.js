@@ -5,25 +5,35 @@ let zoff = 0;
 
 // Canvas
 let dim = {x: 1000, y: 1000};
-let scl = 25;
+let sceneScale = 25;
 let inc = 0.1;
 
 // Strokes
-const noStrokes = 30;
+const noStrokes = 50;
 const noStrokeLines = 6;
-const strokeLineDistance = 1.8;
+const strokeLineDistance = 1.9;
+const strokeLineNoise = 0.3;
+const lineNoise = 0.9;
 
-let lineWeight = dim.x / (18*scl);
+let lineWeight = dim.x / (18*sceneScale);
 
 // Spots
-const spotArea = 3;
+const spotArea = 2;
 const noSpotStrokes = 100;
+const spotNoise = 5;
 
+// Colors
+const outlineColor = "#000";
+
+const colorPalette1 = ["#2B3A42", "#3F5866", "#BDD3DE", "#F0F0DF", "#FF9000"]; // Kuler: machine - Kopie von Copy of MAchine learning with Erik option 2
+const colorPalette2 = ["#181929", "#4D4E66", "#CCD0DE", "#FFFFFF", "#FF2612"]; // Kuler: machine - Kopie von Copy of MAchine learning with Erik option 2
+const colorPalette3 = ["#609BE6", "#65C6F0", "#66D5D9", "#65F0CD", "#60E69F"]; // Kuler - colorful
+const colorPalette = colorPalette2;
 
 function setup() {
   createCanvas(dim.x, dim.y);
-  cols = floor(width/scl);
-  rows = floor(height/scl);
+  cols = floor(width/sceneScale);
+  rows = floor(height/sceneScale);
   flowField = new Array(rows*cols);
   noFill();
   noLoop();
@@ -43,22 +53,21 @@ function draw() {
       flowField[index] = {vector: v};
       flowField[index].position = {x, y};
       xoff += inc;
-      // showVectorField(x, y, v);
+      showVectorField(x, y, v);
     };
     yoff += inc;
     // zoff += 0.00005; // INFO: how fast vectors change over time
   };
 
   // Draw blob of strokes
-  drawBlobsOfStrokes(3, [60, 140, 220]);
+  drawBlobsOfStrokes(5, colorPalette);
 
   // Draw random single strokes
-  const noStrokeTypes = 3
+  const noStrokeTypes = 5
   for (let i = 0; i < noStrokeTypes; i++) {
-    drawSingleStrokes(floor(250 * i / noStrokeTypes));
+    drawSingleStrokes(colorPalette[i]);
   };
 
-  
   // frameRateCheck.html(floor(frameRate()));
 }
 
@@ -77,14 +86,18 @@ function showVectorField(x, y, v) {
       stroke(0, 50);
       strokeWeight(1);
       push();
-      translate(x * scl, y * scl);
+      translate(x * sceneScale, y * sceneScale);
       rotate(v.heading());
-      line(0, 0, scl, 0);
+      line(0, 0, sceneScale, 0);
       pop();
 };
 
+function randomNoise(factor) {
+  return map(noise(random()), 0, 1, 1 - factor, 1 + factor);
+};
+
 function getFlowFieldElement(point) {
-  const gridPos = {x: floor(point.x/scl), y: floor(point.y/scl)};
+  const gridPos = {x: floor(point.x/sceneScale), y: floor(point.y/sceneScale)};
   return flowField.find(element => element.position.x == gridPos.x && element.position.y == gridPos.y);
 };
 
@@ -96,7 +109,7 @@ function createFlowLine(startPoint, noPoints) {
     // console.log("point", i, point);
     // drawPoint(point, floor(255/noPoints) * i);
     const direction = getFlowFieldElement(point).vector;
-    const force = direction.setMag(scl);
+    const force = direction.setMag(sceneScale);
     const nextPoint = point.add(force);
     // Prevents long strokes due to points leaving the canvas
     if (nextPoint.x < 0 || nextPoint.x > dim.x || nextPoint.y < 0 || nextPoint.y > dim.y) {
@@ -119,7 +132,7 @@ function createAdjacentFlowLine(line, no) {
   for (let i = 0; i < line.length; i++) {
     let point = line[i].copy();
     const direction = getFlowFieldElement(point).vector;
-    const force = direction.copy().setMag(strokeLineDistance * no).rotate(-PI/2);
+    const force = direction.copy().setMag(no * strokeLineDistance * randomNoise(strokeLineNoise)).rotate(-PI/2  * randomNoise(lineNoise));
     point = point.add(force);
     // drawPoint(point, i * 30);
     adjacentLine.push(point);
@@ -142,7 +155,7 @@ function drawCurvedStroke(lines, weight, color) {
 };
 
 function stylizedStroke(line, color) {
-  drawCurvedStroke(line, lineWeight * 2.5, 0);
+  drawCurvedStroke(line, lineWeight * 2.5, outlineColor);
   drawCurvedStroke(line, lineWeight, color);
 };
 
@@ -175,12 +188,11 @@ function drawBlobsOfStrokes(noSpots, color) {
   for (let i = 0; i < noSpots; i++) {
     const spots = [];
     const randomSpot = createVector(random(width), random(height));
-    const spotAreaVariation = map(noise(random()), 0, 1, 0.8, 1.2);
-    const spotRadius = spotArea * scl * spotAreaVariation;
+    const spotRadius = spotArea * sceneScale * randomNoise(spotNoise);
     
     // console.log("random Spot", randomSpot.x, randomSpot.y);
     let counter = 0;
-    let loopbreaker = 0;
+    let loopChecker = 0;
     while (counter < noSpotStrokes) {
       const spotPoint = createVector((randomSpot.x - spotRadius) + (2 * spotRadius * noise(random() * counter)), ((randomSpot.y - spotRadius) + (2 * spotRadius * noise(random() * counter))));
       
@@ -214,11 +226,11 @@ function drawBlobsOfStrokes(noSpots, color) {
         counter++;
         spots.push(stroke);
       } else {
-        loopbreaker++
+        loopChecker++
         console.warn("Cannot create stroke:", spotPoint.x, spotPoint.y);
       };
       // Get out of loop if there are issues
-      if (loopbreaker > 10000) {
+      if (loopChecker > 10000) {
         counter = noSpotStrokes
         console.error("LOOP EXIT - Strokes too close to canvas border.");
       };
@@ -226,12 +238,12 @@ function drawBlobsOfStrokes(noSpots, color) {
     // console.log("NO of Elements", counter, noSpotStrokes);
     // if (spots.length > 0) {
       for (let j = 0; j < spots.length; j++) {
-        drawCurvedStroke(spots[j], lineWeight * 2.5, 0);
+        drawCurvedStroke(spots[j], lineWeight * 2.5, outlineColor);
       };
       for (let k = 0; k < spots.length; k++) {
         drawCurvedStroke(spots[k], lineWeight, color[i]);
       };
-      drawPoint(randomSpot, 0);
+      // drawPoint(randomSpot, 0);
     // };
   };
 };
